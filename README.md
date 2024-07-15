@@ -1,0 +1,1 @@
+This is a first Kotlin + Spring Boot + My SQL db projec
