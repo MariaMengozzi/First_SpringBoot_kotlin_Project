@@ -17,6 +17,6 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: build
-        run: ./gradlew build -x test -x aggregateJavadocJar
+        run: ./gradlew build -x test
       - name: test
         run: ./gradlew test --parallel || ./gradlew test --parallel || ./gradlew test --parallel
