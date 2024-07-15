@@ -13,10 +13,13 @@ jobs:
         uses: gradle/wrapper-validation-action@v3.4.2
 
   build:
+    needs:
+      - validation
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{matrix.os}}
+        os: [ubuntu, macos, windows]
+        java-version: [17, 21]
+    runs-on: ${{matrix.os}}-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
