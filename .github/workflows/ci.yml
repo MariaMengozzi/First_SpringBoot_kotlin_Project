@@ -18,21 +18,25 @@ jobs:
   build:
     needs:
       - validation
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: kotlin_bank
-          MYSQL_USER: root
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_PASSWORD: ${{secrets.DATABASEPASSWORD}}
-        ports:
-          - "3306:3306"
     strategy:
       matrix:
         os: [ubuntu, macos, windows]
         java-version: [21]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: kotlin_bank
+          MYSQL_USER: root
+          MYSQL_PASSWORD: ""
+          MYSQL_ROOT_PASSWORD: ""
+        ports:
+          - 3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     runs-on: ${{matrix.os}}-latest
     steps:
       - uses: actions/checkout@v4
