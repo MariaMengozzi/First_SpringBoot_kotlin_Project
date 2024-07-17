@@ -2,6 +2,10 @@ name: ci
 
 on:
   push:
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   validation:
