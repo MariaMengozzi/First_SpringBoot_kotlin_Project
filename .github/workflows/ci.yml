@@ -24,21 +24,6 @@ jobs:
         os: [ubuntu, macos, windows]
         java-version: [21]
     runs-on: ${{matrix.os}}-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ROOT_PASSWORD: ${{secrets.DATABASEPASSWORD}}
-          MYSQL_DATABASE: kotlin_bank
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -46,12 +31,13 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: adopt
-      - name: Wait for MySQL
-        run: |
-          until mysql -h "127.0.0.1" -P "3306" -u "root" -e "SHOW DATABASES;" > /dev/null 2>&1; do
-            echo "Waiting for MySQL to be available..."
-            sleep 1
-          done
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+          collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+          mysql database: 'kotlin_bank'
+          mysql root password: ${{ secrets.RootPassword }} # Required if "mysql user" is empty, default is empty. The root superuser password
+
       - name: build
         run: ./gradlew build -x test
       - name: test
