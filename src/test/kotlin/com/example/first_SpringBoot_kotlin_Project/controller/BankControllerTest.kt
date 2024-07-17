@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.*
 
 @SpringBootTest //it creates the whole spring project here we are testing the REST API
@@ -208,9 +209,12 @@ internal class BankControllerTest @Autowired constructor(
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class DeleteRequest {
         @Test
+        @DirtiesContext
         fun `should delete the bank with the given account number`() {
             //given
-            val accountNumber = "5678" //use a different accountNumber due to tests are run in a non-deterministic way
+
+            //use a different accountNumber (es 5678) or add @DirtiesContext (for cleaning the context after this test) due to tests are run in a non-deterministic way
+            val accountNumber = "1234"
             //when/then
             mockMvc.delete("$baseUrl/$accountNumber")
                 .andDo{print()}
