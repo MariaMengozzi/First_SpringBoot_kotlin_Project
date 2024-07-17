@@ -24,6 +24,21 @@ jobs:
         os: [ubuntu, macos, windows]
         java-version: [21]
     runs-on: ${{matrix.os}}-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ${{secrets.DATABASEPASSWORD}}
+          MYSQL_DATABASE: kotlin_bank
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java
@@ -31,10 +46,12 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: adopt
-      - name: Set up MySQL
+      - name: Wait for MySQL
         run: |
-          sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE kotlin_bank;' -u root -p$ {{ secrets.DB_PASSWORD }}
+          until mysql -h "127.0.0.1" -P "3306" -u "root" -e "SHOW DATABASES;" > /dev/null 2>&1; do
+            echo "Waiting for MySQL to be available..."
+            sleep 1
+          done
       - name: build
         run: ./gradlew build -x test
       - name: test
