@@ -15,6 +15,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate the Gradle Wrapper
         uses: gradle/wrapper-validation-action@v3.4.2
+    services:
+      # How to use MySQL
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: ""
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
   build:
     needs:
       - validation
@@ -30,16 +39,11 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: adopt
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-          host: localhost
-          character-set-server: 'utf8' # Optional, default value is 'utf8mb4'
-          collation-server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'
-          mysql-version: '8.0' # Optional, default value is "latest"
-          mysql-database: 'kotlin_bank' # Optional, default value is "test"
-          mysql-root-password: ${{ secrets.DATABASEPASSWORD }} # Required if "mysql-user" is empty
-          mysql-user: 'developer' # Required if "mysql-root-password" is empty
-          mysql-password: ${{ secrets.DATABASEPASSWORD }} # Required if "mysql-user" exists
+      - name: Verify MySQL connection from host
+        run: |
+          sudo apt-get install -y mysql-client libmysqlclient-dev
+          mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -proot -e "SHOW GRANTS FOR 'root'@'localhost'"
+          mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -proot mysql
       - name: build
         run: ./gradlew build -x test
       - name: test
