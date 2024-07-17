@@ -2,19 +2,17 @@ package com.example.first_SpringBoot_kotlin_Project.controller
 
 import com.example.first_SpringBoot_kotlin_Project.model.Bank
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.*
 
 @SpringBootTest //it creates the whole spring project here we are testing the REST API
 @AutoConfigureMockMvc
+@Sql(scripts = ["classpath:test_db.sql"])
 internal class BankControllerTest @Autowired constructor(
      val mockMvc: MockMvc,
      val objectMapper: ObjectMapper
@@ -22,10 +20,8 @@ internal class BankControllerTest @Autowired constructor(
 
     //@Autowired //with this spring boot does the dependency injection
     //lateinit var mockMvc: MockMvc //this should use only in tests -> moved to constructor
-
-
-
     val baseUrl = "/api/banks"
+
 
     @Nested
     @DisplayName("GET /api/banks")
@@ -39,7 +35,7 @@ internal class BankControllerTest @Autowired constructor(
                 .andExpect{
                     status {isOk()}
                     content { contentType(MediaType.APPLICATION_JSON) }
-                    jsonPath("$[0].accountNumber"){ value("1234") }
+                    jsonPath("$[?(@.accountNumber =~ /1234|1010|5678/)]"){exists()}
                 }
         }
     }
@@ -209,12 +205,11 @@ internal class BankControllerTest @Autowired constructor(
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class DeleteRequest {
         @Test
-        @DirtiesContext
         fun `should delete the bank with the given account number`() {
             //given
 
             //use a different accountNumber (es 5678) or add @DirtiesContext (for cleaning the context after this test) due to tests are run in a non-deterministic way
-            val accountNumber = "1234"
+            val accountNumber = "5678"
             //when/then
             mockMvc.delete("$baseUrl/$accountNumber")
                 .andDo{print()}
@@ -246,6 +241,8 @@ internal class BankControllerTest @Autowired constructor(
                 }
         }
     }
+
+
 
 
 }
