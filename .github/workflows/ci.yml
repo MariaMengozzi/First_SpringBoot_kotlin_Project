@@ -31,6 +31,18 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: adopt
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          host_port: 3800
+          container_port: 3307
+          character_set_server: 'utf8'
+          collation_server: 'utf8_general_ci'
+          mysql_version: '8.0'
+          mysql_database: 'kotlin_bank'
+          mysql_root_password: ${{ secrets.RootPassword }}
+          mysql_user: 'root'
+          mysql_password: ${{ secrets.DatabasePassword }}
       - name: build
         run: ./gradlew build -x test
       - name: test
