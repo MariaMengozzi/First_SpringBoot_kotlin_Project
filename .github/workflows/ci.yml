@@ -38,7 +38,7 @@ jobs:
       - name: execute query MySQL
         run: |
           mysql -uroot -e 'CREATE DATABASE kotlin_bank; USE kotlin_bank; CREATE TABLE bank (
-            accountNumber VARCHAR(255) PRIMARY KEY,
+            account_number VARCHAR(255) PRIMARY KEY,
             trust DOUBLE,
             transaction_fee INT
           );'
